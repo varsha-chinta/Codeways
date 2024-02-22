@@ -1,0 +1,88 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score,classification_report
+
+df = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/Churn_Modelling.csv")
+df.head()
+
+df.drop(["RowNumber","CustomerId","Surname"],axis=1,inplace=True)
+
+label_encoders = {}
+for column in ["Geography", "Gender"]:
+    label_encoders[column] = LabelEncoder()
+    df[column] = label_encoders[column].fit_transform(df[column])
+
+X=df.drop("Exited",axis=1)
+Y = df["Exited"]
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_classifier.fit(X_train, Y_train)
+
+Y_pred = rf_classifier.predict(X_test)
+
+accuracy = accuracy_score(Y_test,Y_pred)
+print("Accuracy:",accuracy)
+print("Classification Report:")
+print(classification_report(Y_test,Y_pred))
+#o/p:Accuracy: 0.8645
+
+feature_importances = pd.DataFrame(rf_classifier.feature_importances_, index=X.columns, columns=['Importance']).sort_values('Importance', ascending=False)
+print("Feature Importances:")
+print(feature_importances)
+
+import pandas as pd
+# Create a sample DataFrame
+# Create a sample DataFrame
+sample_data = pd.DataFrame({
+    'CreditScore': [600, 700],
+    'Geography': ['France', 'Germany'],
+    'Gender': ['Female', 'Male'],
+    'Age': [35, 45],
+    'Tenure': [3, 7],
+    'Balance': [50000, 100000],
+    'NumOfProducts': [1, 2],
+    'HasCrCard': [1, 0],
+    'IsActiveMember': [1, 1],
+    'EstimatedSalary': [60000, 80000]
+})
+
+import numpy as np
+
+# Preprocess the sample data - encode categorical variables
+for column in ["Geography", "Gender"]:
+    if column in label_encoders:
+        unseen_label = max(label_encoders[column].transform(label_encoders[column].classes_)) + 1
+        sample_data[column] = sample_data[column].map(lambda s: s if s in label_encoders[column].classes_ else 'other')
+        label_encoders[column].classes_ = np.append(label_encoders[column].classes_, 'other')
+        sample_data[column] = label_encoders[column].transform(sample_data[column])
+    else:
+        print(f"Label encoder for column '{column}' not found.")
+
+# Drop the target column ("Exited") if present in sample_data
+if "Exited" in sample_data.columns:
+    sample_data.drop("Exited", axis=1, inplace=True)
+
+# Convert sample_data to a 2D numpy array
+sample_data_array = sample_data.to_numpy()
+
+# Scale numerical features
+sample_data_scaled = scaler.transform(sample_data_array)
+
+# Make predictions
+sample_predictions = rf_classifier.predict(sample_data_scaled)
+
+# Display predictions
+print("Predictions for sample data:")
+for i, prediction in enumerate(sample_predictions):
+    print(f"Customer {i+1}: Churn {'Yes' if prediction == 1 else 'No'}")
+
+
+
+
+
